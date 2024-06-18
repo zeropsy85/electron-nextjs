@@ -1,4 +1,9 @@
 /** @type {import('next').NextConfig} */
-const nextConfig = {};
+const nextConfig = {
+	output: 'export',
+	trailingSlash: true,
+	distDir: 'build',
+	assetPrefix: process.env.NODE_ENV === 'production' ? '.' : '',
+}
 
-export default nextConfig;
+export default nextConfig
