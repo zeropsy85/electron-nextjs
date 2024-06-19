@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "main": "main.js",
+  "type": "module",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
@@ -13,6 +14,7 @@
     "deploy:win32": "electron-builder --windows nsis:ia32"
   },
   "dependencies": {
+    "electron-serve": "^2.0.0",
     "next": "14.2.4",
     "react": "^18",
     "react-dom": "^18"
@@ -40,12 +42,12 @@
       ]
     },
     "mac": {
-        "target": [
-            "default"
-        ]
+      "target": [
+        "default"
+      ]
     },
     "dmg": {
-        "title": "HelloElectron"
+      "title": "HelloElectron"
     },
     "win": {
       "target": [

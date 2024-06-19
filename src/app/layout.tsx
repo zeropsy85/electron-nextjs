@@ -1,27 +1,7 @@
 import type { Metadata } from "next";
-import localFont from 'next/font/local'
 import "./globals.css";
 
-const notoSans = localFont({
-  src : [
-    {
-      path :'./fonts/noto-sans-kr-v21-latin_korean-500.woff',
-      weight : '500',
-      style : 'normal'
-    },
-    {
-      path :'./fonts/noto-sans-kr-v21-latin_korean-700.woff',
-      weight : '700',
-      style : 'normal'
-    },
-    {
-      path :'./fonts/noto-sans-kr-v21-latin_korean-900.woff',
-      weight : '900',
-      style : 'normal'
-    },
-  ],
-  display: 'swap',
-})
+import Header from "@/components/Header";
 
 export const metadata: Metadata = {
   title: "Electron with nextjs 14",
@@ -34,8 +14,11 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={notoSans.className}>
-      <body>{children}</body>
+    <html lang="ko">
+      <body>
+        <Header />
+        {children}
+      </body>
     </html>
   );
 }

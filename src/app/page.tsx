@@ -1,6 +1,7 @@
 'use client';
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
+
 const radioInputOptions = [
   { value: 'video_a', label: '영상 1번' },
   { value: 'video_b', label: '영상 2번' },
@@ -12,6 +13,36 @@ export default function Home() {
   const [isVideoView, setIsVideoView] = useState(false);
   const [selectRadio, setSelectRadio] = useState("");
   const [tempRadio, setTempRadio] = useState("");
+
+  const videoRef = useRef<HTMLVideoElement | null>(null);
+  const canvasRef = useRef<HTMLCanvasElement | null>(null);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined' && typeof navigator !== 'undefined') {
+      document.getElementById('startCamera')?.addEventListener('click', function() {
+        navigator.mediaDevices.getUserMedia({ video: true })
+          .then(function(stream) {
+
+            if (videoRef.current) {
+              videoRef.current.srcObject = stream;
+              videoRef.current.onloadedmetadata = function(e) {
+                videoRef.current?.play();
+              };
+            }
+          })
+          .catch(function(err) {
+            console.log(err.name + ": " + err.message);
+          });
+      });
+
+      document.getElementById('capture')?.addEventListener('click', function() {
+        if (canvasRef.current && videoRef.current) {
+          const context = canvasRef.current.getContext('2d');
+          context?.drawImage(videoRef.current, 0, 0, 640, 480);
+        }
+      });
+    }
+  }, [isVideoView]);
 
   const handleLayer = () => {
     setIsLayerView(true);
@@ -101,6 +132,11 @@ export default function Home() {
           }
         </div>
       </div>
+
+      <button id="startCamera">Start Camera</button>
+      <video ref={videoRef} />
+      <button id="capture">Capture</button>
+      <canvas ref={canvasRef} width="640" height="480" />
     </main>
   );
 }

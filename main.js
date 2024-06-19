@@ -1,67 +1,18 @@
-const { app, BrowserWindow, ipcMain, Notification } = require('electron');
-const path = require('path');
-const url = require('url');
+import {app, BrowserWindow} from 'electron';
+import serve from 'electron-serve';
+
+const loadURL = serve({directory: 'build'});
 
 let mainWindow;
 
-const createWindow = () => {
-  mainWindow = new BrowserWindow({
-    width: 1024,
-    height: 768,
-    autoHideMenuBar: true,
-  });
+(async () => {
+	await app.whenReady();
 
-  const startUrl = url.format({
-    pathname: path.join(__dirname, './build/index.html'),
-    protocol: 'file:',
-    slashes: true
-});
+	mainWindow = new BrowserWindow({width: 1200, height: 800});
 
-  // mainWindow.setMenu(null);
-  mainWindow.loadURL(startUrl); 
-  // mainWindow.webContents.openDevTools();
-//   mainWindow.kiosk = true;
-};
+	await loadURL(mainWindow);
+	await loadURL(mainWindow, {id: 4, foo: 'bar'});
+	await mainWindow.loadURL('app://-');
 
-app.whenReady().then(() => {
-  createWindow();
-
-  const myNotification = new Notification({
-    title: 'Hello!',
-    body: 'This is an example notification.'
-  })
-
-  myNotification.show();
-
-  app.on('activate', () => {
-    if (BrowserWindow.getAllWindows().length === 0) createWindow();
-  });
-});
-
-app.on('window-all-closed', () => {
-  if (process.platform !== 'darwin') app.quit();
-});
-
-ipcMain.on('print-setting', () => {
-  mainWindow.webContents.print();
-});
-
-ipcMain.on('print-direct', () => {
-  mainWindow.webContents.print({ silent: true });
-});
-
-  
-ipcMain.on('print-getprintersasync', async() => {
-  const printers = await mainWindow.webContents.getPrintersAsync();
-  console.log(printers[0]); 
-  mainWindow.webContents.print({
-    silent: false,
-    deviceName: printers[0].name,
-  }, (success, error) => {
-    if(success){
-      console.log('printed');
-    }else{
-      console.log('failed');
-    }
-  })
-})
+    mainWindow.webContents.openDevTools();
+})();

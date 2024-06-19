@@ -1,3 +1,28 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@font-face {
+	font-family: "noto-sans-kr-v21-latin_korean";
+	font-style: normal;
+	font-weight: normal;
+	src: url("./fonts/noto-sans-kr-v21-latin_korean-500.woff") format("woff");
+}
+
+@font-face {
+	font-family: "noto-sans-kr-v21-latin_korean";
+	font-style: normal;
+	font-weight: 700;
+	src: url("./fonts/noto-sans-kr-v21-latin_korean-700.woff") format("woff");
+}
+
+@font-face {
+	font-family: "noto-sans-kr-v21-latin_korean";
+	font-style: normal;
+	font-weight: 900;
+	src: url("./fonts/noto-sans-kr-v21-latin_korean-900.woff") format("woff");
+}
+
+body {
+    font-family: 'noto-sans-kr-v21-latin_korean', sans-serif;
+}
