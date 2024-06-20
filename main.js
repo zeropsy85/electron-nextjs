@@ -1,29 +1,43 @@
-import { app, BrowserWindow, Notification } from 'electron';
-import serve from 'electron-serve';
-
-const loadURL = serve({directory: 'build'});
+const { app, BrowserWindow, ipcMain, Notification } = require('electron');
+const path = require('path');
+const url = require('url');
 
 let mainWindow;
 
-(async () => {
-	await app.whenReady();
+const createWindow = () => {
+  mainWindow = new BrowserWindow({
+    width: 1400,
+    height: 800,
+    autoHideMenuBar: true,
+  });
 
-	mainWindow = new BrowserWindow({
-		width: 1400, 
-		height: 800,
-		autoHideMenuBar: true,
-	});
-	
-    // mainWindow.webContents.openDevTools();
-	// mainWindow.setMenu(null);
-	// mainWindow.kiosk = true;
+  const startUrl = url.format({
+      pathname: path.join(__dirname, './build/index.html'),
+      protocol: 'file:',
+      slashes: true
+  });
 
-	const myNotification = new Notification({
-        title: 'Hello!',
-		body: 'This is an example notification.'
-    })
-	
-	myNotification.show();
+  // mainWindow.setMenu(null);
+  mainWindow.loadURL(startUrl); 
+//   mainWindow.webContents.openDevTools();
+//   mainWindow.kiosk = true;
+};
 
-    await loadURL(mainWindow);
-})();
+app.whenReady().then(() => {
+  createWindow();
+
+  const myNotification = new Notification({
+    title: 'Hello!',
+    body: 'This is an example notification.'
+  })
+
+  myNotification.show();
+
+  app.on('activate', () => {
+    if (BrowserWindow.getAllWindows().length === 0) createWindow();
+  });
+});
+
+app.on('window-all-closed', () => {
+  if (process.platform !== 'darwin') app.quit();
+});

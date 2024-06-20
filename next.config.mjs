@@ -4,6 +4,7 @@ const nextConfig = {
 	output: 'export',
 	trailingSlash: true,
 	distDir: 'build',
+    assetPrefix: '.',
 	images: {
 		unoptimized : true
 	}
