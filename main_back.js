@@ -6,8 +6,8 @@ let mainWindow;
 
 const createWindow = () => {
   mainWindow = new BrowserWindow({
-    width: 1024,
-    height: 768,
+    width: 1400,
+    height: 800,
     autoHideMenuBar: true,
   });
 
@@ -19,7 +19,7 @@ const createWindow = () => {
 
   // mainWindow.setMenu(null);
   mainWindow.loadURL(startUrl); 
-  mainWindow.webContents.openDevTools();
+//   mainWindow.webContents.openDevTools();
 //   mainWindow.kiosk = true;
 };
 
@@ -41,27 +41,3 @@ app.whenReady().then(() => {
 app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') app.quit();
 });
-
-ipcMain.on('print-setting', () => {
-  mainWindow.webContents.print();
-});
-
-ipcMain.on('print-direct', () => {
-  mainWindow.webContents.print({ silent: true });
-});
-
-  
-ipcMain.on('print-getprintersasync', async() => {
-  const printers = await mainWindow.webContents.getPrintersAsync();
-  console.log(printers[0]); 
-  mainWindow.webContents.print({
-    silent: false,
-    deviceName: printers[0].name,
-  }, (success, error) => {
-    if(success){
-      console.log('printed');
-    }else{
-      console.log('failed');
-    }
-  })
-})

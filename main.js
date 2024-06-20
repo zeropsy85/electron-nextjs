@@ -1,4 +1,4 @@
-import {app, BrowserWindow} from 'electron';
+import { app, BrowserWindow, Notification } from 'electron';
 import serve from 'electron-serve';
 
 const loadURL = serve({directory: 'build'});
@@ -8,11 +8,22 @@ let mainWindow;
 (async () => {
 	await app.whenReady();
 
-	mainWindow = new BrowserWindow({width: 1200, height: 800});
+	mainWindow = new BrowserWindow({
+		width: 1400, 
+		height: 800,
+		autoHideMenuBar: true,
+	});
+	
+    // mainWindow.webContents.openDevTools();
+	// mainWindow.setMenu(null);
+	// mainWindow.kiosk = true;
 
-	await loadURL(mainWindow);
-	await loadURL(mainWindow, {id: 4, foo: 'bar'});
-	await mainWindow.loadURL('app://-');
+	const myNotification = new Notification({
+        title: 'Hello!',
+		body: 'This is an example notification.'
+    })
+	
+	myNotification.show();
 
-    mainWindow.webContents.openDevTools();
+    await loadURL(mainWindow);
 })();
