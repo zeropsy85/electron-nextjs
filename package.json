@@ -18,6 +18,7 @@
     },
     "dependencies": {
         "electron-serve": "^2.0.0",
+        "gsap": "file:gsap-bonus.tgz",
         "next": "14.2.4",
         "react": "^18",
         "react-dom": "^18"
@@ -27,7 +28,7 @@
         "@types/react": "^18",
         "@types/react-dom": "^18",
         "electron": "^31.0.1",
-        "electron-builder": "^24.13.3",
+        "electron-builder": "^22.14.13",
         "eslint": "^8",
         "eslint-config-next": "14.2.4",
         "postcss": "^8",
@@ -40,8 +41,8 @@
         "asar": true,
         "mac": {
             "target": [
-                    "default"
-                ]
+                "default"
+            ]
         },
         "dmg": {
             "title": "HelloElectron"

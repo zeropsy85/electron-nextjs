@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="30.248" height="28.201" viewBox="0 0 30.248 28.201">
+  <g id="icon" transform="translate(-11.649 -0.17)">
+    <g id="그룹_35" data-name="그룹 35" transform="translate(12.149 0.682)">
+      <line id="선_12" data-name="선 12" y2="17.724" transform="translate(12.143 9.384)" fill="none" stroke="#ceaa8a" stroke-miterlimit="10" stroke-width="1"/>
+      <line id="선_13" data-name="선 13" y2="3.052" transform="translate(17.172 9.517)" fill="none" stroke="#ceaa8a" stroke-linecap="round" stroke-miterlimit="10" stroke-width="1"/>
+      <line id="선_14" data-name="선 14" y2="10.757" transform="translate(17.161 16.417)" fill="none" stroke="#ceaa8a" stroke-linecap="round" stroke-miterlimit="10" stroke-width="1"/>
+      <path id="사각형_1211" data-name="사각형 1211" d="M2.537,0H26.711a2.537,2.537,0,0,1,2.537,2.537v0a2.537,2.537,0,0,1-2.537,2.537H2.537A2.537,2.537,0,0,1,0,2.537v0A2.537,2.537,0,0,1,2.537,0Z" transform="translate(0 4.212)" fill="none" stroke="#a8a8a8" stroke-miterlimit="10" stroke-width="1"/>
+      <path id="패스_2098" data-name="패스 2098" d="M31.307,50.515H9.358A1.781,1.781,0,0,1,7.5,48.825V32.612H33.166V48.825A1.78,1.78,0,0,1,31.307,50.515Z" transform="translate(-5.708 -23.326)" fill="none" stroke="#a8a8a8" stroke-miterlimit="10" stroke-width="1"/>
+      <path id="패스_2099" data-name="패스 2099" d="M26,5.562V3.473s.3-2.686,2.686-1.791a11.9,11.9,0,0,1,1.194.9c.3.3,3.135,3.079,3.135,3.079" transform="translate(-18.688 -1.5)" fill="none" stroke="#ceaa8a" stroke-miterlimit="10" stroke-width="1"/>
+      <path id="패스_2100" data-name="패스 2100" d="M59.015,6.062V3.973s-.3-2.686-2.686-1.791a11.9,11.9,0,0,0-1.194.9c-.3.3-3.135,3.079-3.135,3.079" transform="translate(-36.928 -1.851)" fill="none" stroke="#ceaa8a" stroke-miterlimit="10" stroke-width="1"/>
+      <rect id="사각형_1212" data-name="사각형 1212" width="7.461" height="4.775" transform="translate(10.894 4.361)" fill="none" stroke="#ceaa8a" stroke-miterlimit="10" stroke-width="1"/>
+    </g>
+  </g>
+</svg>
