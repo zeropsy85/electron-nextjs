@@ -37,7 +37,7 @@ let mainWindow;
 })();
 
 ipcMain.on('print-direct', () => {
-    mainWindow.webContents.print({ silent: true }, (success) => {
+    mainWindow.webContents.print({ silent: false }, (success) => {
         if (success) {
             mainWindow.webContents.send('print-completed');
         } else {

@@ -1,11 +1,11 @@
 'use client';
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Image from 'next/image';
-import Link from "next/link";
 
-import PrintTemplate from "@/components/PrintTemplate";
-import Skeleton from "@/components/Skeleton";
+import { gsap } from "gsap";
+import ThumbnailList from "@/components/ThumbnailList";
+import Popup from "@/components/Popup";
 
 export default function ExampleApi() {
     const [isLoading, setIsLoading] = useState(false);
@@ -13,29 +13,32 @@ export default function ExampleApi() {
     const [popupImage, setPopupImage] = useState(null);
     const [viewData , setViewData] = useState<any>([]);
     const [newDataLength , setNewDataLength] = useState(0);
+    const newCountRef = useRef<HTMLDivElement>(null);
+
     const handleDataSearch = async()=>{
         try {
             setIsLoading(true);
             setNewDataLength(0);
             
-            const resp = await fetch('http://10.10.10.224:3001/api')
+            const resp = await fetch('http://10.10.10.119:3001/api')
             const json = await resp.json();
 
             if(viewData.length === 0){
                 setViewData(sortDataByTimestamp(json.data));
             }else{
-                setViewData((prevData: any[]) => {
-                    const newData = json.data.filter((newItem: any) => !prevData.some((prevItem: any) => prevItem.id === newItem.id));
-                    setNewDataLength(newData.length);
-    
-                    return [...sortDataByTimestamp(newData), ...prevData];
-                });
+                addNewData(json.data);
             }
         } catch (err) {
             console.log(err);
         } finally {
             setIsLoading(false);
         }
+    }
+
+    const addNewData = (data: any) => {
+        const newData = data.filter((newItem: any) => !viewData.some((viewItem:any) => viewItem.id === newItem.id));
+        setNewDataLength(newData.length);
+        setViewData((prevData:any) => [...sortDataByTimestamp(newData), ...prevData]);
     }
 
     const sortDataByTimestamp = (data: any)=>{
@@ -51,32 +54,18 @@ export default function ExampleApi() {
         setIsLayerView(false);
     }
 
-    const handlePrint = ()=>{
-        if (window.electron) {
-            window.electron.print();
-        } else {
-            // electron 환경에서 출력할 수 있습니다.
-            window.print();
-        }
-    }
-
-    const dateFormatYYYYMMDDHHMMSS = (date : string)=>{
-        const baseDay = new Date(date);
-        const formatDate = baseDay.getDate() < 10 ? `0${baseDay.getDate()}` : baseDay.getDate();
-        const formatMonth = baseDay.getMonth() < 9 ? `0${baseDay.getMonth() + 1}` : baseDay.getMonth() + 1;
-        const formatHour = baseDay.getHours() < 10 ? `0${baseDay.getHours()}` : baseDay.getHours();
-        const formatMinute = baseDay.getMinutes() < 10 ? `0${baseDay.getMinutes()}` : baseDay.getMinutes();
-        const formatSecond = baseDay.getSeconds() < 10 ? `0${baseDay.getSeconds()}` : baseDay.getSeconds();
-        const formattedDate = [baseDay.getFullYear(), formatMonth, formatDate].join('-') + ' (' + [formatHour, formatMinute, formatSecond].join(':') + ')';
-        return formattedDate;
-    }
-
     useEffect(()=>{
         if (window.electron) {
             window.electron.on('print-completed', handleLayerClose);
             window.electron.on('print-failed', handleLayerClose);
         }
-    },[])
+    },[]);
+
+    useEffect(()=>{
+        if(newDataLength > 0){
+            gsap.fromTo(newCountRef.current, { x: -20, opacity:0 }, { x: 0, opacity: 1, duration: 0.7, ease: 'Power3.easeOut' });
+        }
+    },[newDataLength]);
 
     return (
         <main className="p-10 pt-[110px]">
@@ -98,7 +87,7 @@ export default function ExampleApi() {
                 }
                 {
                     newDataLength > 0 &&
-                    <div className="flex items-center text-red-400">
+                    <div className="flex items-center text-red-400" ref={newCountRef}>
                         + {newDataLength}
                     </div>
                 }
@@ -112,78 +101,8 @@ export default function ExampleApi() {
                     <span className="mt-[-3px]">samsung</span>
                 </div>
             </div>
-            
-            {
-                isLayerView && (
-                    <div className="fixed top-0 left-0 h-full w-full flex justify-center items-center bg-black bg-opacity-70 z-10" onClick={handleLayerClose}>
-                        <div className="border rounded-lg bg-white relative p-10 flex flex-col justify-center" onClick={(e) => e.stopPropagation()}>
-                            <button onClick={handleLayerClose} className="absolute top-4 right-3">
-                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1} stroke="currentColor" className="size-8">
-                                    <path strokeLinecap="round" strokeLinejoin="round" d="m9.75 9.75 4.5 4.5m0-4.5-4.5 4.5M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
-                                </svg>
-                            </button>
-                            <div className="mt-6">
-                                {
-                                    popupImage && <PrintTemplate imgSrc={popupImage} />
-                                }
-                            </div>
-                            <button className="flex gap-2 justify-center mt-6 border border-black rounded-md p-3 hover:bg-black hover:text-white ease-out duration-300" onClick={handlePrint}>
-                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6">
-                                    <path strokeLinecap="round" strokeLinejoin="round" d="M6.72 13.829c-.24.03-.48.062-.72.096m.72-.096a42.415 42.415 0 0 1 10.56 0m-10.56 0L6.34 18m10.94-4.171c.24.03.48.062.72.096m-.72-.096L17.66 18m0 0 .229 2.523a1.125 1.125 0 0 1-1.12 1.227H7.231c-.662 0-1.18-.568-1.12-1.227L6.34 18m11.318 0h1.091A2.25 2.25 0 0 0 21 15.75V9.456c0-1.081-.768-2.015-1.837-2.175a48.055 48.055 0 0 0-1.913-.247M6.34 18H5.25A2.25 2.25 0 0 1 3 15.75V9.456c0-1.081.768-2.015 1.837-2.175a48.041 48.041 0 0 1 1.913-.247m10.5 0a48.536 48.536 0 0 0-10.5 0m10.5 0V3.375c0-.621-.504-1.125-1.125-1.125h-8.25c-.621 0-1.125.504-1.125 1.125v3.659M18 10.5h.008v.008H18V10.5Zm-3 0h.008v.008H15V10.5Z" />
-                                </svg>
-                                <span>프린트 하기</span>
-                            </button>
-                        </div>
-                    </div>
-                )
-            }
-            {
-                <ul id="ul-list" className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 mt-10">
-                    {
-                        viewData.length === 0 ? Array.from({ length: 25 }).map((_, index) => <li className="flex-grow rounded-lg p-4 border shadow-lg" key={index}><Skeleton /></li>) :
-                        viewData?.map((el:any , idx:number) => {
-                            return (
-                                <li key={idx} className={`relative flex-grow rounded-lg p-4 shadow-lg border ${newDataLength > idx && 'border-red-300'}`}>
-                                    {
-                                        newDataLength > idx && 
-                                        <div className="absolute left-[-9px] top-[-12px] text-red-300">
-                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6">
-                                                <path strokeLinecap="round" strokeLinejoin="round" fill="#fca5a5" d="M9.813 15.904 9 18.75l-.813-2.846a4.5 4.5 0 0 0-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 0 0 3.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 0 0 3.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 0 0-3.09 3.09ZM18.259 8.715 18 9.75l-.259-1.035a3.375 3.375 0 0 0-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 0 0 2.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 0 0 2.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 0 0-2.456 2.456ZM16.894 20.567 16.5 21.75l-.394-1.183a2.25 2.25 0 0 0-1.423-1.423L13.5 18.75l1.183-.394a2.25 2.25 0 0 0 1.423-1.423l.394-1.183.394 1.183a2.25 2.25 0 0 0 1.423 1.423l1.183.394-1.183.394a2.25 2.25 0 0 0-1.423 1.423Z" />
-                                            </svg>
-                                        </div>
-                                    }
-                                    <div className="flex gap-1 mb-3">
-                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6">
-                                            <path strokeLinecap="round" strokeLinejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12Z" />
-                                        </svg>
-                                        {el.like_count}
-                                        <Link className="ml-auto" href={el.permalink} target="_blank">
-                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6">
-                                                <path strokeLinecap="round" strokeLinejoin="round" d="M13.19 8.688a4.5 4.5 0 0 1 1.242 7.244l-4.5 4.5a4.5 4.5 0 0 1-6.364-6.364l1.757-1.757m13.35-.622 1.757-1.757a4.5 4.5 0 0 0-6.364-6.364l-4.5 4.5a4.5 4.5 0 0 0 1.242 7.244" />
-                                            </svg>
-                                        </Link>
-                                    </div>
-                                    <div className="mb-1 text-sm overflow-hidden text-ellipsis whitespace-nowrap">
-                                        게시일 : {dateFormatYYYYMMDDHHMMSS(el.timestamp)}
-                                    </div>
-                                    <div className="mb-5 text-sm overflow-hidden text-ellipsis whitespace-nowrap">
-                                        ID : {el.id}
-                                    </div>
-                                    <div className="border rounded-lg overflow-hidden text-[0px]">
-                                        {el.media_type === 'VIDEO' ? (
-                                            el.media_url ? <video className="w-full h-[200px]" src={el.media_url} controls /> : <div className="w-full h-[200px] flex justify-center items-center text-sm">media_url 없음</div>
-                                        ) : (
-                                            <button onClick={(e)=>{handleShowPopup(el.media_url)}} className="w-full h-[200px] relative hover:scale-105 transform transition ease-out duration-300"><Image src={el.media_url} className="object-cover" fill alt="" /></button>
-                                        )}
-                                    </div>
-                                </li>
-                            )
-                        })
-                        
-                    }
-                </ul>
-            }
-            
+            <Popup popupImage={popupImage} isLayerView={isLayerView} handleLayerClose={handleLayerClose} />
+            <ThumbnailList data={viewData} newDataLength={newDataLength} handleShowPopup={handleShowPopup} skeletonLength={25} />
         </main>
     );
 }
