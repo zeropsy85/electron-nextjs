@@ -37,7 +37,7 @@ export default function ThumbnailList({data , newDataLength , handleShowPopup , 
         <ul id="ul-list" className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 mt-16">
             {
                 data.length === 0 ? Array.from({ length: skeletonLength }).map((_, index) => <li className="flex-grow rounded-lg p-4 border shadow-lg" key={index}><Skeleton /></li>) :
-                data.map((el:any , idx:number) => {
+                data.filter((el:any) => el.media_url).map((el:any , idx:number) => {
                     return (
                         <li ref={el => { thumbnailListRefs.current[idx] = el; }} key={el.id} className={`relative flex-grow rounded-lg p-4 shadow-lg border ${newDataLength > idx && 'border-red-300'}`}>
                             {
@@ -66,11 +66,13 @@ export default function ThumbnailList({data , newDataLength , handleShowPopup , 
                                 ID : {el.id}
                             </div>
                             <div className="border rounded-lg overflow-hidden text-[0px]">
-                                {el.media_type === 'VIDEO' ? (
-                                    el.media_url ? <video className="w-full h-[200px]" src={el.media_url} controls /> : <div className="w-full h-[200px] flex justify-center items-center text-sm">media_url 없음</div>
-                                ) : (
-                                    <button onClick={(e)=>{handleShowPopup(el.media_url)}} className="w-full h-[200px] relative hover:scale-105 transform transition ease-out duration-300"><Image src={el.media_url} className="object-cover" fill alt="" /></button>
-                                )}
+                                <button onClick={(e)=>{handleShowPopup(el)}} className="w-full h-[200px] relative">
+                                    {el.media_type === 'VIDEO' ? (
+                                        <video className="w-full h-[200px]" src={el.media_url} />
+                                    ) : (
+                                        <Image src={el.media_url} className="object-cover" fill alt="" priority />
+                                    )}
+                                </button>
                             </div>
                         </li>
                     )

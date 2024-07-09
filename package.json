@@ -19,9 +19,11 @@
     "dependencies": {
         "electron-serve": "^2.0.0",
         "gsap": "file:gsap-bonus.tgz",
+        "hangul-js": "^0.2.6",
         "next": "14.2.4",
         "react": "^18",
-        "react-dom": "^18"
+        "react-dom": "^18",
+        "react-simple-keyboard": "^3.7.131"
     },
     "devDependencies": {
         "@types/node": "^20",

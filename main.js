@@ -24,7 +24,7 @@ let mainWindow;
 	
     // mainWindow.webContents.openDevTools();
 	// mainWindow.setMenu(null);
-	// mainWindow.kiosk = true;
+	mainWindow.kiosk = true;
 
 	const myNotification = new Notification({
         title: 'Hello!',
@@ -37,7 +37,7 @@ let mainWindow;
 })();
 
 ipcMain.on('print-direct', () => {
-    mainWindow.webContents.print({ silent: false }, (success) => {
+    mainWindow.webContents.print({ silent: true }, (success) => {
         if (success) {
             mainWindow.webContents.send('print-completed');
         } else {

@@ -27,6 +27,37 @@ body {
     font-family: 'noto-sans-kr-v21-latin_korean', sans-serif;
 }
 
+.hg-theme-default .hg-button {height: 50px !important;}
+.hg-button-space {flex-grow: 6 !important;}
+.hg-button-empty {flex-grow: 6 !important;font-size: 0;background: #fff !important;}
+
+.hg-button-special span{width:20px;} 
+.hg-button-shift span {width:20px;height:20px;background:url('/svg_arrowup.svg') no-repeat center center !important;background-size: cover !important;font-size: 0;}
+.hg-button-bksp span {width:20px;height:20px;background:url('/svg_delete.svg') no-repeat center center !important;background-size: cover !important;font-size: 0;}
+.hg-button-enter span {width:20px;height:20px;background:url('/svg_search.svg') no-repeat center center !important;background-size: cover !important;font-size: 0;}
+.hg-button-language span {width:20px;height:20px;background:url('/svg_language.svg') no-repeat center center transparent !important;background-size: cover !important;font-size:0;}
+.hg-button-space span {width:30px;height:20px;background:url('/svg_spacebar.svg') no-repeat center center transparent !important;background-size: cover !important;font-size:0;}
+
+.hg-layout-eng_shift .hg-button-shift span , .hg-layout-korean_shift .hg-button-shift span {background:url('/svg_arrowup_active.svg') no-repeat center center !important}
+.hg-layout-eng_shift .hg-button-language span , .hg-layout-eng .hg-button-language span {background:url('/svg_language_active.svg') no-repeat center center !important}
+
+.input-keyboard {width: 200px;padding-right:40px;background:url('/svg_keyboard_up.svg') no-repeat right center;background-size: 20px;}
+.keyboard-down {background:url('/svg_keyboard_down.svg') no-repeat center;background-size: 20px;}
+
+.hg-theme-default .hg-button.active-button {background: #ddd;}
+
+@keyframes blink {
+    0% { opacity: 1; }
+    50% { opacity: 0; }
+    100% { opacity: 1; }
+}
+
+.blinking-cursor {
+    animation: blink 1s steps(1) infinite;
+    background: #017cfe;
+    margin-left:1px;
+}
+
 @media print {
     @page { margin: 0; }
 
