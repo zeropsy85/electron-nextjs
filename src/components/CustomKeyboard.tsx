@@ -8,11 +8,10 @@ import { gsap } from "gsap";
 
 import 'react-simple-keyboard/build/css/index.css';
 
-
 interface CustomKeyboardProps {
-    setKeyboardInput: any;
+    setKeyboardInput: (value: string) => void;
     isKeyboardView: boolean;
-    setIsKeyboardView: any;
+    setIsKeyboardView: (value: boolean) => void
     handleDataWithHashtag: (hashtag: string) => void;
 }
 
@@ -22,17 +21,17 @@ export default function CustomKeyboard({setKeyboardInput , isKeyboardView , setI
     const [inputPreview , setInputPreview] = useState('');
     const [layout, setLayout] = useState("korean");
     const [isShifted, setIsShifted] = useState(false);
-    
-
-    const onChange = (input: string) => {
-        setInputPreview(Hangul.assemble(Hangul.disassemble(input)));
-    };
 
     const onKeyPress = (button: string) => {
         switch (button) {
             case "{language}":
                 setIsShifted(false);
                 setLayout(layout.startsWith("eng") ? "korean" : "eng");
+                break;
+            case "{bksp}":
+                const disassembled = Hangul.disassemble(inputPreview);
+                disassembled.pop();
+                setInputPreview(Hangul.assemble(disassembled));
                 break;
             case "{shift}":
                 if (layout === "special1" || layout === "special2") {
@@ -57,6 +56,7 @@ export default function CustomKeyboard({setKeyboardInput , isKeyboardView , setI
                     handleDataWithHashtag(inputPreview);
                 }
                 break;
+            default : setInputPreview((input) => Hangul.assemble(Hangul.disassemble(input +button)));
         }
     };
 
@@ -82,7 +82,6 @@ export default function CustomKeyboard({setKeyboardInput , isKeyboardView , setI
                 </div>
                 <div className="w-full mb-3">
                     <Keyboard
-                        onChange={onChange}
                         onKeyPress={onKeyPress}
                         layout={{
                             eng: [

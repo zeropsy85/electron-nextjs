@@ -4,8 +4,8 @@ import { useEffect , useRef, useState } from 'react';
 import Image from 'next/image';
 import Link from "next/link";
 
-import { dateFormatYYYYMMDDHHMMSS } from '@/util/date';
 import { gsap } from "gsap";
+import { dateFormatYYYYMMDDHHMMSS } from '@/util/date';
 import Skeleton from "./Skeleton";
 
 interface ThumbnailListProps {
