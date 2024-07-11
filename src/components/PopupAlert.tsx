@@ -1,14 +1,13 @@
 'use client';
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useContext, useEffect, useRef, useState } from "react";
 
 import { gsap } from "gsap";
+import { InstagramApiContext } from "@/context/InstagramApiContext";
 
-interface PopupAlertProps {
-    customAlert : { alertText: string; };
-}
 
-export default function PopupAlert({customAlert} : PopupAlertProps) {
+export default function PopupAlert() {
+    const { customAlert } = useContext(InstagramApiContext);
     const layerRef = useRef<HTMLDivElement>(null);
     const [isLayerView, setIsLayerView] = useState(false);
 

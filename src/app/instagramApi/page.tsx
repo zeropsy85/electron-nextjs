@@ -2,6 +2,7 @@
 
 import React,{ useCallback, useEffect, useState } from "react";
 
+import { InstagramApiContext } from "@/context/InstagramApiContext";
 import InstagramNav from "@/components/InstagramNav";
 import CustomKeyboard from "@/components/CustomKeyboard";
 import Popup from "@/components/Popup";
@@ -10,20 +11,14 @@ import ThumbnailList from "@/components/ThumbnailList";
 
 import { DataProps } from "@/types/DataProps";
 
-const MemoInstagramNav = React.memo(InstagramNav);
-const MemoCustomKeyboard = React.memo(CustomKeyboard);
-const MemoPopup = React.memo(Popup);
-const MemoPopupAlert = React.memo(PopupAlert);
-const MemoThumbnailList = React.memo(ThumbnailList);
-
 const apiAddress = 'http://10.10.10.117:3001/api';
 
-export default function ExampleApi() {
+export default function InstagramApi() {
     const [isLoading, setIsLoading] = useState(false);
     const [isKeyboardView , setIsKeyboardView] = useState(false);
     const [newDataLength , setNewDataLength] = useState(0);
     const [keyboardInput , setKeyboardInput] = useState('');
-    const [popupThumbnailInfo, setPopupThumbnailInfo] = useState({isLayerView : false, popupInfo : {}});
+    const [popupThumbnailInfo, setPopupThumbnailInfo] = useState({isLayerView : false, popupInfo : {media_type : '', media_url : ''}});
     
     const [viewData , setViewData] = useState<DataProps[]>([]);
     const [customAlert , setCustomAlert] = useState({alertText : ''});
@@ -78,29 +73,19 @@ export default function ExampleApi() {
         }
     },[setIsLoading , setNewDataLength , setKeyboardInput]);
     
-    const handleDataSearch = useCallback(async () => {
-        fetchData(addNewData);
-    },[fetchData , addNewData]);
-
-    const handleDataWithHashtag = useCallback(async(hashtag: string)=>{
-        fetchData(addNewData, hashtag);
-    },[fetchData , addNewData]);
-
     useEffect(() => {
         fetchData(data => setViewData(sortDataByTimestamp(data)));
     }, [fetchData, sortDataByTimestamp]);
-
-    const handleShowPopup = useCallback((data: DataProps)=>{
-        setPopupThumbnailInfo({isLayerView : true, popupInfo : data});
-    },[]);
-
+    
     return (
         <main className="p-10 pt-[110px]">
-            <MemoPopupAlert customAlert={customAlert} />
-            <MemoInstagramNav viewData={viewData} newDataLength={newDataLength} isLoading={isLoading} keyboardInput={keyboardInput} setIsKeyboardView={setIsKeyboardView} handleDataSearch={handleDataSearch} />
-            <MemoCustomKeyboard isKeyboardView={isKeyboardView} setKeyboardInput={setKeyboardInput} setIsKeyboardView={setIsKeyboardView} handleDataWithHashtag={handleDataWithHashtag} setCustomAlert={setCustomAlert} />
-            <MemoPopup popupThumbnailInfo={popupThumbnailInfo} setPopupThumbnailInfo={setPopupThumbnailInfo} setCustomAlert={setCustomAlert} />
-            <MemoThumbnailList data={viewData} newDataLength={newDataLength} handleShowPopup={handleShowPopup} skeletonLength={25} />
+            <InstagramApiContext.Provider value={{fetchData , viewData , addNewData, isLoading , newDataLength , keyboardInput , setKeyboardInput , isKeyboardView , setIsKeyboardView , popupThumbnailInfo , setPopupThumbnailInfo , customAlert, setCustomAlert}}>
+                <PopupAlert />
+                <InstagramNav />
+                <CustomKeyboard />
+                <Popup />
+                <ThumbnailList skeletonLength={25} />
+            </InstagramApiContext.Provider>
         </main>
     );
 }

@@ -1,27 +1,22 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useContext, useEffect, useRef, useState } from 'react';
 
+import { InstagramApiContext } from '@/context/InstagramApiContext';
 import Keyboard from 'react-simple-keyboard';
 import Hangul from "hangul-js";
 import { gsap } from "gsap";
 
 import 'react-simple-keyboard/build/css/index.css';
 
-interface CustomKeyboardProps {
-    setKeyboardInput: (value: string) => void;
-    isKeyboardView: boolean;
-    setIsKeyboardView: (value: boolean) => void
-    handleDataWithHashtag: (hashtag: string) => void;
-    setCustomAlert: (value: { alertText: string; }) => void;
-}
-
-export default function CustomKeyboard({setKeyboardInput , isKeyboardView , setIsKeyboardView , handleDataWithHashtag , setCustomAlert}: CustomKeyboardProps) {
+export default function CustomKeyboard() {
     const layerRef = useRef<HTMLDivElement>(null);
     const keyboardRef = useRef<HTMLDivElement>(null);
     const [inputPreview , setInputPreview] = useState('');
     const [layout, setLayout] = useState("korean");
     const [isShifted, setIsShifted] = useState(false);
+
+    const { setKeyboardInput , isKeyboardView , setIsKeyboardView , fetchData , addNewData , setCustomAlert } = useContext(InstagramApiContext);
 
     const onKeyPress = (button: string) => {
         switch (button) {
@@ -55,7 +50,7 @@ export default function CustomKeyboard({setKeyboardInput , isKeyboardView , setI
                 }else{
                     setKeyboardInput(inputPreview);
                     setIsKeyboardView(false);
-                    handleDataWithHashtag(inputPreview);
+                    fetchData(addNewData , inputPreview);
                 }
                 break;
             default : setInputPreview((input) => Hangul.assemble(Hangul.disassemble(input +button)));

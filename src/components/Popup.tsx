@@ -1,24 +1,18 @@
 'use client';
 
-import { useEffect, useRef , useCallback } from "react";
+import { useEffect, useRef , useCallback, useContext } from "react";
 
+import { InstagramApiContext } from "@/context/InstagramApiContext";
 import PrintTemplate from "./PrintTemplate";
 import { gsap } from "gsap";
 
-import { DataProps } from "@/types/DataProps";
 
-interface PopupProps {
-    popupThumbnailInfo : { isLayerView: boolean; popupInfo: {
-        media_type?: string;
-        media_url?: string;
-    } };
-    setPopupThumbnailInfo : (value: { isLayerView: boolean; popupInfo: {} }) => void;
-    setCustomAlert: (value: { alertText: string; }) => void;
-}
-
-export default function Popup({ popupThumbnailInfo , setPopupThumbnailInfo , setCustomAlert }: PopupProps) {
+export default function Popup() {
+    const { popupThumbnailInfo, setPopupThumbnailInfo , setCustomAlert } = useContext(InstagramApiContext);
     const layerRef = useRef<HTMLDivElement>(null);
     const videoRef = useRef<HTMLVideoElement>(null);
+
+    console.log('팝업 랜더링');
 
     const handlePrint = ()=>{
         if (window.electron) {
@@ -31,7 +25,7 @@ export default function Popup({ popupThumbnailInfo , setPopupThumbnailInfo , set
 
     const handleLayerClose = useCallback(()=>{
         gsap.to(layerRef.current, { autoAlpha: 0, duration: 0.6, ease:'Power3.easeOut' ,onComplete:()=>{
-            setPopupThumbnailInfo({isLayerView : false, popupInfo : {}});
+            setPopupThumbnailInfo({isLayerView : false, popupInfo : {media_type : '', media_url : ''}});
         }});
         videoRef.current?.pause();
 

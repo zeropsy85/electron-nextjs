@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect , useRef, useState } from 'react';
+import { useContext, useEffect , useRef, useState } from 'react';
 import Image from 'next/image';
 import Link from "next/link";
 
@@ -8,25 +8,23 @@ import { gsap } from "gsap";
 import { dateFormatYYYYMMDDHHMMSS } from '@/util/date';
 import Skeleton from "./Skeleton";
 
-import { DataProps } from '@/types/DataProps';
+import { InstagramApiContext } from '@/context/InstagramApiContext';
 
 interface ThumbnailListProps {
-    data : DataProps[];
-    newDataLength : number;
-    handleShowPopup : (e: DataProps) => void;
     skeletonLength : number;
 }
 
-export default function ThumbnailList({data , newDataLength , handleShowPopup , skeletonLength} : ThumbnailListProps) {
+export default function ThumbnailList({ skeletonLength} : ThumbnailListProps) {
+    const { viewData , newDataLength , setPopupThumbnailInfo } = useContext(InstagramApiContext);
     const thumbnailListRefs = useRef<(HTMLLIElement | null)[]>([]);
     const [firstAnimation , setFirstAnimation] = useState(true);
 
     useEffect(() => {
-        if (data.length > 0 && firstAnimation) {
+        if (viewData.length > 0 && firstAnimation) {
             gsap.fromTo(thumbnailListRefs.current, { scale: 0 }, { scale: 1, duration: 0.8, stagger: 0.07, delay: 0.5, ease: 'Power3.easeOut' });
             setFirstAnimation(false);
         }
-    }, [data , firstAnimation]);
+    }, [viewData , firstAnimation]);
 
     useEffect(() =>{
         if (newDataLength > 0) {
@@ -38,8 +36,8 @@ export default function ThumbnailList({data , newDataLength , handleShowPopup , 
     return (
         <ul id="ul-list" className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 mt-16">
             {
-                data.length === 0 ? Array.from({ length: skeletonLength }).map((_, index) => <li className="flex-grow rounded-lg p-4 border shadow-lg" key={index}><Skeleton /></li>) :
-                data.filter((el:any) => el.media_url).map((el:any , idx:number) => {
+                viewData.length === 0 ? Array.from({ length: skeletonLength }).map((_, index) => <li className="flex-grow rounded-lg p-4 border shadow-lg" key={index}><Skeleton /></li>) :
+                viewData.filter((el:any) => el.media_url).map((el:any , idx:number) => {
                     return (
                         <li ref={el => { thumbnailListRefs.current[idx] = el; }} key={el.id} className={`relative flex-grow rounded-lg p-4 shadow-lg border ${newDataLength > idx && 'border-red-300'}`}>
                             {
@@ -68,7 +66,7 @@ export default function ThumbnailList({data , newDataLength , handleShowPopup , 
                                 ID : {el.id}
                             </div>
                             <div className="border rounded-lg overflow-hidden text-[0px]">
-                                <button onClick={(e)=>{handleShowPopup(el)}} className="w-full h-[200px] relative">
+                                <button onClick={()=>{setPopupThumbnailInfo({isLayerView: true , popupInfo: el})}} className="w-full h-[200px] relative">
                                     {el.media_type === 'VIDEO' ? (
                                         <>
                                             <span className="w-full h-full absolute left-0 top-0 bg-black opacity-40"></span>
