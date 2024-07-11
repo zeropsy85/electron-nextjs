@@ -16,7 +16,10 @@ const MemoPopup = React.memo(Popup);
 const MemoPopupAlert = React.memo(PopupAlert);
 const MemoThumbnailList = React.memo(ThumbnailList);
 
-const apiAddress = 'http://10.10.10.117:3001/api';
+const HASHTAG_ID = process.env.NEXT_PUBLIC_DEFAULT_HASHTAG_ID;
+const FACEBOOK_API = process.env.NEXT_PUBLIC_FACEBOOK_API;
+const INSTAGRAM_BUSINESS_ID = process.env.NEXT_PUBLIC_INSTAGRAM_BUSINESS_ID;
+const ACCESS_TOKEN = process.env.NEXT_PUBLIC_ACCESS_TOKEN;
 
 export default function ExampleApi() {
     const [isLoading, setIsLoading] = useState(false);
@@ -46,13 +49,25 @@ export default function ExampleApi() {
         try {
             setIsLoading(true);
             setNewDataLength(0);
+
+            let hashTagId = HASHTAG_ID;
+
+            if(hashtag){
+                const resp = await fetch(`${FACEBOOK_API}/ig_hashtag_search?user_id=${INSTAGRAM_BUSINESS_ID}&access_token=${ACCESS_TOKEN}&q=${hashtag}`);
+                const searchHashTagId = await resp.json();
+
+                if (searchHashTagId.error) {
+                    throw new Error(JSON.stringify(searchHashTagId.error));
+                }
+
+                hashTagId = searchHashTagId.data[0].id;
+            }
     
-            const url = hashtag ? `${apiAddress}?hashtag=${hashtag}` : apiAddress;
-            const resp = await fetch(url);
+            const resp = await fetch(`${FACEBOOK_API}/${hashTagId}/recent_media?user_id=${INSTAGRAM_BUSINESS_ID}&fields=id,media_type,like_count,media_url,permalink,timestamp&access_token=${ACCESS_TOKEN}`);
             const json = await resp.json();
     
-            if (!resp.ok) {
-                throw new Error(json.error);
+            if (json.error) {
+                throw new Error(JSON.stringify(json.error));
             }
 
             callback(json.data);
