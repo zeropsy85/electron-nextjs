@@ -13,9 +13,10 @@ interface CustomKeyboardProps {
     isKeyboardView: boolean;
     setIsKeyboardView: (value: boolean) => void
     handleDataWithHashtag: (hashtag: string) => void;
+    setCustomAlert: (value: { alertText: string; }) => void;
 }
 
-export default function CustomKeyboard({setKeyboardInput , isKeyboardView , setIsKeyboardView , handleDataWithHashtag}: CustomKeyboardProps) {
+export default function CustomKeyboard({setKeyboardInput , isKeyboardView , setIsKeyboardView , handleDataWithHashtag , setCustomAlert}: CustomKeyboardProps) {
     const layerRef = useRef<HTMLDivElement>(null);
     const keyboardRef = useRef<HTMLDivElement>(null);
     const [inputPreview , setInputPreview] = useState('');
@@ -46,10 +47,11 @@ export default function CustomKeyboard({setKeyboardInput , isKeyboardView , setI
                 const nextIndex = (currentIndex + 1) % layouts.length;
                 setLayout(layouts[nextIndex]);
                 break;
+            case "{empty}":
+                return;
             case "{enter}":
-                if(inputPreview === ''){
-                    alert('해시태그를 입력해주세요.')
-                    
+                if(inputPreview.length === 0){
+                    setCustomAlert({alertText : '해시태그를 입력해주세요.'});
                 }else{
                     setKeyboardInput(inputPreview);
                     setIsKeyboardView(false);

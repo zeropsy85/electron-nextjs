@@ -36,7 +36,6 @@ body {
 .hg-button-bksp span {width:20px;height:20px;background:url('/svg_delete.svg') no-repeat center center !important;background-size: cover !important;font-size: 0;}
 .hg-button-enter span {width:20px;height:20px;background:url('/svg_search.svg') no-repeat center center !important;background-size: cover !important;font-size: 0;}
 .hg-button-language span {width:20px;height:20px;background:url('/svg_language.svg') no-repeat center center transparent !important;background-size: cover !important;font-size:0;}
-.hg-button-space span {width:30px;height:20px;background:url('/svg_spacebar.svg') no-repeat center center transparent !important;background-size: cover !important;font-size:0;}
 
 .hg-layout-eng_shift .hg-button-shift span , .hg-layout-korean_shift .hg-button-shift span {background:url('/svg_arrowup_active.svg') no-repeat center center !important}
 .hg-layout-eng_shift .hg-button-language span , .hg-layout-eng .hg-button-language span {background:url('/svg_language_active.svg') no-repeat center center !important}
@@ -45,6 +44,7 @@ body {
 .keyboard-down {background:url('/svg_keyboard_down.svg') no-repeat center;background-size: 20px;}
 
 .hg-theme-default .hg-button.active-button {background: #ddd;}
+.hg-theme-default .hg-button.hg-standardBtn[data-skbtn="@"] {max-width: inherit !important;}
 
 @keyframes blink {
     0% { opacity: 1; }
@@ -72,6 +72,7 @@ body {
     }
 
     #print-image {
+        print-color-adjust: exact;
         -webkit-print-color-adjust: exact;
         padding:40px 40px 150px 40px;
         background: rgb(148,45,217);

@@ -8,10 +8,12 @@ import { gsap } from "gsap";
 import { dateFormatYYYYMMDDHHMMSS } from '@/util/date';
 import Skeleton from "./Skeleton";
 
+import { DataProps } from '@/types/DataProps';
+
 interface ThumbnailListProps {
-    data : any;
+    data : DataProps[];
     newDataLength : number;
-    handleShowPopup : (e: any) => void;
+    handleShowPopup : (e: DataProps) => void;
     skeletonLength : number;
 }
 
@@ -68,7 +70,14 @@ export default function ThumbnailList({data , newDataLength , handleShowPopup , 
                             <div className="border rounded-lg overflow-hidden text-[0px]">
                                 <button onClick={(e)=>{handleShowPopup(el)}} className="w-full h-[200px] relative">
                                     {el.media_type === 'VIDEO' ? (
-                                        <video className="w-full h-[200px]" src={el.media_url} />
+                                        <>
+                                            <span className="w-full h-full absolute left-0 top-0 bg-black opacity-40"></span>
+                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1} stroke="currentColor" className="size-12 absolute left-1/2 top-1/2 translate-x-[-50%] translate-y-[-50%] text-white">
+                                                <path strokeLinecap="round" strokeLinejoin="round" d="M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+                                                <path strokeLinecap="round" strokeLinejoin="round" d="M15.91 11.672a.375.375 0 0 1 0 .656l-5.603 3.113a.375.375 0 0 1-.557-.328V8.887c0-.286.307-.466.557-.327l5.603 3.112Z" />
+                                            </svg>
+                                            <video className="w-full h-[200px]" src={el.media_url} />
+                                        </>
                                     ) : (
                                         <Image src={el.media_url} className="object-cover" fill alt="" priority />
                                     )}

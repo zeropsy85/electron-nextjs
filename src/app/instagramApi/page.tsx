@@ -5,32 +5,40 @@ import React,{ useCallback, useEffect, useState } from "react";
 import InstagramNav from "@/components/InstagramNav";
 import CustomKeyboard from "@/components/CustomKeyboard";
 import Popup from "@/components/Popup";
+import PopupAlert from "@/components/PopupAlert";
 import ThumbnailList from "@/components/ThumbnailList";
+
+import { DataProps } from "@/types/DataProps";
 
 const MemoInstagramNav = React.memo(InstagramNav);
 const MemoCustomKeyboard = React.memo(CustomKeyboard);
 const MemoPopup = React.memo(Popup);
+const MemoPopupAlert = React.memo(PopupAlert);
 const MemoThumbnailList = React.memo(ThumbnailList);
+
+const apiAddress = 'http://10.10.10.117:3001/api';
 
 export default function ExampleApi() {
     const [isLoading, setIsLoading] = useState(false);
-    const [isLayerView , setIsLayerView] = useState(false);
     const [isKeyboardView , setIsKeyboardView] = useState(false);
     const [newDataLength , setNewDataLength] = useState(0);
     const [keyboardInput , setKeyboardInput] = useState('');
-    const [popupInfo, setPopupInfo] = useState<any>([]);
-    const [viewData , setViewData] = useState<any>([]);
+    const [popupThumbnailInfo, setPopupThumbnailInfo] = useState({isLayerView : false, popupInfo : {}});
+    
+    const [viewData , setViewData] = useState<DataProps[]>([]);
+    const [customAlert , setCustomAlert] = useState({alertText : ''});
 
-    const sortDataByTimestamp = useCallback((data: any)=>{
-        return data?.sort((a: { timestamp: string }, b: { timestamp: string }) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+    const sortDataByTimestamp = useCallback((data: DataProps[])=>{
+        return data.sort((a: { timestamp: string }, b: { timestamp: string }) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
     },[]);
 
-    const addNewData = useCallback((data: any) => {
-        const newData = data?.filter((newItem: any) => !viewData.some((viewItem:any) => viewItem.id === newItem.id));
-        setNewDataLength(newData?.length);
-    
+    const addNewData = useCallback((data: DataProps[]) => {
+        const newData = data.filter((newItem: DataProps) => !viewData.some((viewItem:DataProps) => viewItem.id === newItem.id));
+
         if(newData){
-            setViewData((prevData:any) => [...sortDataByTimestamp(newData), ...prevData]);
+            const uniqueData = newData.filter((newItem: DataProps) => !viewData.some((viewItem:DataProps) => viewItem.id === newItem.id));
+            setViewData((prevData:DataProps[]) => [...sortDataByTimestamp(uniqueData), ...prevData]);
+            setNewDataLength(uniqueData.length);
         }
     }, [viewData , sortDataByTimestamp]);
 
@@ -39,14 +47,14 @@ export default function ExampleApi() {
             setIsLoading(true);
             setNewDataLength(0);
     
-            const url = hashtag ? `http://10.10.10.119:3001/api?hashtag=${hashtag}` : 'http://10.10.10.119:3001/api';
+            const url = hashtag ? `${apiAddress}?hashtag=${hashtag}` : apiAddress;
             const resp = await fetch(url);
             const json = await resp.json();
     
             if (!resp.ok) {
                 throw new Error(json.error);
             }
-    
+
             callback(json.data);
         } catch (err) {
             const errorMessage = (err as Error).message;
@@ -55,13 +63,13 @@ export default function ExampleApi() {
             try {
                 errorObject = JSON.parse(errorMessage);
             } catch (parseErr) {
-                console.log('Error parsing JSON:', parseErr);
+                setCustomAlert({alertText: JSON.stringify(parseErr)});
             }
 
             if (!errorObject || !errorObject.error_user_title) {
-                alert('에러가 발생하였습니다. \n잠시 후 다시 시도해주세요.');
+                setCustomAlert({alertText: '에러가 발생하였습니다. 잠시 후 다시 시도해주세요.'});
             } else {
-                alert(errorObject.error_user_title);
+                setCustomAlert({alertText: errorObject.error_user_title});
             }
 
             setKeyboardInput('');
@@ -82,27 +90,16 @@ export default function ExampleApi() {
         fetchData(data => setViewData(sortDataByTimestamp(data)));
     }, [fetchData, sortDataByTimestamp]);
 
-    const handleShowPopup = useCallback((e: any)=>{
-        setPopupInfo(e);
-        setIsLayerView(true);
+    const handleShowPopup = useCallback((data: DataProps)=>{
+        setPopupThumbnailInfo({isLayerView : true, popupInfo : data});
     },[]);
-
-    const handleLayerClose = useCallback(()=>{
-        setIsLayerView(false);
-    },[setIsLayerView]);
-
-    useEffect(()=>{
-        if (window.electron) {
-            window.electron.on('print-completed', handleLayerClose);
-            window.electron.on('print-failed', handleLayerClose);
-        }
-    },[handleLayerClose]);
 
     return (
         <main className="p-10 pt-[110px]">
+            <MemoPopupAlert customAlert={customAlert} />
             <MemoInstagramNav viewData={viewData} newDataLength={newDataLength} isLoading={isLoading} keyboardInput={keyboardInput} setIsKeyboardView={setIsKeyboardView} handleDataSearch={handleDataSearch} />
-            <MemoCustomKeyboard isKeyboardView={isKeyboardView} setKeyboardInput={setKeyboardInput} setIsKeyboardView={setIsKeyboardView} handleDataWithHashtag={handleDataWithHashtag} />
-            <MemoPopup popupInfo={popupInfo} isLayerView={isLayerView} handleLayerClose={handleLayerClose} />
+            <MemoCustomKeyboard isKeyboardView={isKeyboardView} setKeyboardInput={setKeyboardInput} setIsKeyboardView={setIsKeyboardView} handleDataWithHashtag={handleDataWithHashtag} setCustomAlert={setCustomAlert} />
+            <MemoPopup popupThumbnailInfo={popupThumbnailInfo} setPopupThumbnailInfo={setPopupThumbnailInfo} setCustomAlert={setCustomAlert} />
             <MemoThumbnailList data={viewData} newDataLength={newDataLength} handleShowPopup={handleShowPopup} skeletonLength={25} />
         </main>
     );
