@@ -4,32 +4,33 @@ import React,{ useCallback, useEffect, useState } from "react";
 
 import InstagramNav from "@/components/InstagramNav";
 import CustomKeyboard from "@/components/CustomKeyboard";
-import Popup from "@/components/Popup";
-import PopupAlert from "@/components/PopupAlert";
+import AlertLayout from "@/components/AlertLayout";
 import ThumbnailList from "@/components/ThumbnailList";
+import Popup from "@/components/Popup";
 
 import { DataProps } from "@/types/DataProps";
+import { useThumbnailPopup } from '@/hooks/useThumbNailPopup';
+
+import { getFetchData } from "./actions";
+import ThumbnailLayout from "@/components/ThumbnailLayout";
 
 const MemoInstagramNav = React.memo(InstagramNav);
 const MemoCustomKeyboard = React.memo(CustomKeyboard);
-const MemoPopup = React.memo(Popup);
-const MemoPopupAlert = React.memo(PopupAlert);
+const MemoAlertLayout = React.memo(AlertLayout);
 const MemoThumbnailList = React.memo(ThumbnailList);
 
-const HASHTAG_ID = process.env.NEXT_PUBLIC_DEFAULT_HASHTAG_ID;
-const FACEBOOK_API = process.env.NEXT_PUBLIC_FACEBOOK_API;
-const INSTAGRAM_BUSINESS_ID = process.env.NEXT_PUBLIC_INSTAGRAM_BUSINESS_ID;
-const ACCESS_TOKEN = process.env.NEXT_PUBLIC_ACCESS_TOKEN;
+const defaultHashTag = 'samsung';
 
-export default function ExampleApi() {
+export default function InstagramApi() {
+    const { isPopupOpen , popupType, openPopup , closePopup } = useThumbnailPopup();
+
     const [isLoading, setIsLoading] = useState(false);
     const [isKeyboardView , setIsKeyboardView] = useState(false);
     const [newDataLength , setNewDataLength] = useState(0);
-    const [keyboardInput , setKeyboardInput] = useState('');
-    const [popupThumbnailInfo, setPopupThumbnailInfo] = useState({isLayerView : false, popupInfo : {}});
-    
+    const [keyboardInput , setKeyboardInput] = useState(defaultHashTag);
     const [viewData , setViewData] = useState<DataProps[]>([]);
-    const [customAlert , setCustomAlert] = useState({alertText : ''});
+    const [selectedData , setSelectedData] = useState<DataProps[]>([]);
+    const [customAlert , setCustomAlert] = useState('');
 
     const sortDataByTimestamp = useCallback((data: DataProps[])=>{
         return data.sort((a: { timestamp: string }, b: { timestamp: string }) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
@@ -38,84 +39,89 @@ export default function ExampleApi() {
     const addNewData = useCallback((data: DataProps[]) => {
         const newData = data.filter((newItem: DataProps) => !viewData.some((viewItem:DataProps) => viewItem.id === newItem.id));
 
-        if(newData){
-            const uniqueData = newData.filter((newItem: DataProps) => !viewData.some((viewItem:DataProps) => viewItem.id === newItem.id));
-            setViewData((prevData:DataProps[]) => [...sortDataByTimestamp(uniqueData), ...prevData]);
-            setNewDataLength(uniqueData.length);
-        }
+        setViewData((prevData:DataProps[]) => [...sortDataByTimestamp(newData), ...prevData]);
+        setNewDataLength(newData.length);
     }, [viewData , sortDataByTimestamp]);
 
-    const fetchData = useCallback(async (callback: (data: any[]) => void, hashtag?: string) => {
+    const handleOpenPopup = useCallback((data: DataProps) => {
+        openPopup('thumbnail');
+        setSelectedData([data]);
+    },[openPopup]);
+
+    const handleOpenPopupWithAlert = useCallback((text: string) => {
+        openPopup('alert');
+        setCustomAlert(text);
+    },[openPopup]);
+
+    const handleDataSearch = useCallback(async () => {
         try {
             setIsLoading(true);
             setNewDataLength(0);
 
-            let hashTagId = HASHTAG_ID;
-
-            if(hashtag){
-                const resp = await fetch(`${FACEBOOK_API}/ig_hashtag_search?user_id=${INSTAGRAM_BUSINESS_ID}&access_token=${ACCESS_TOKEN}&q=${hashtag}`);
-                const searchHashTagId = await resp.json();
-
-                if (searchHashTagId.error) {
-                    throw new Error(JSON.stringify(searchHashTagId.error));
-                }
-
-                hashTagId = searchHashTagId.data[0].id;
-            }
-    
-            const resp = await fetch(`${FACEBOOK_API}/${hashTagId}/recent_media?user_id=${INSTAGRAM_BUSINESS_ID}&fields=id,media_type,like_count,media_url,permalink,timestamp&access_token=${ACCESS_TOKEN}`);
-            const json = await resp.json();
-    
-            if (json.error) {
-                throw new Error(JSON.stringify(json.error));
-            }
-
-            callback(json.data);
+            const response = await getFetchData({ hashtag : keyboardInput });
+            addNewData(response);            
         } catch (err) {
             const errorMessage = (err as Error).message;
-            let errorObject = null;
+            const errorObject = JSON.parse(errorMessage);
+            console.log(errorObject.error_user_title);
 
-            try {
-                errorObject = JSON.parse(errorMessage);
-            } catch (parseErr) {
-                setCustomAlert({alertText: JSON.stringify(parseErr)});
-            }
-
-            if (!errorObject || !errorObject.error_user_title) {
-                setCustomAlert({alertText: '에러가 발생하였습니다. 잠시 후 다시 시도해주세요.'});
-            } else {
-                setCustomAlert({alertText: errorObject.error_user_title});
-            }
-
-            setKeyboardInput('');
+            handleOpenPopupWithAlert(errorObject.error_user_title);
         } finally {
             setIsLoading(false);
         }
-    },[setIsLoading , setNewDataLength , setKeyboardInput]);
-    
-    const handleDataSearch = useCallback(async () => {
-        fetchData(addNewData);
-    },[fetchData , addNewData]);
-
-    const handleDataWithHashtag = useCallback(async(hashtag: string)=>{
-        fetchData(addNewData, hashtag);
-    },[fetchData , addNewData]);
+    },[addNewData , keyboardInput , handleOpenPopupWithAlert]);
 
     useEffect(() => {
-        fetchData(data => setViewData(sortDataByTimestamp(data)));
-    }, [fetchData, sortDataByTimestamp]);
+        const fetchData = async () => {
+            try {
+                setIsLoading(true);
+                setNewDataLength(0);
 
-    const handleShowPopup = useCallback((data: DataProps)=>{
-        setPopupThumbnailInfo({isLayerView : true, popupInfo : data});
-    },[]);
+                const response = await getFetchData({ hashtag: defaultHashTag });
+                setViewData(sortDataByTimestamp(response));
+            } catch (err) {
+                const errorMessage = (err as Error).message;
+                const errorObject = JSON.parse(errorMessage);
+                console.log(errorObject.error_user_title);
+
+                handleOpenPopupWithAlert(errorObject.error_user_title);
+            } finally {
+                setIsLoading(false);
+            }
+        };
+    
+        fetchData();
+    }, [sortDataByTimestamp , handleOpenPopupWithAlert]);
 
     return (
         <main className="p-10 pt-[110px]">
-            <MemoPopupAlert customAlert={customAlert} />
-            <MemoInstagramNav viewData={viewData} newDataLength={newDataLength} isLoading={isLoading} keyboardInput={keyboardInput} setIsKeyboardView={setIsKeyboardView} handleDataSearch={handleDataSearch} />
-            <MemoCustomKeyboard isKeyboardView={isKeyboardView} setKeyboardInput={setKeyboardInput} setIsKeyboardView={setIsKeyboardView} handleDataWithHashtag={handleDataWithHashtag} setCustomAlert={setCustomAlert} />
-            <MemoPopup popupThumbnailInfo={popupThumbnailInfo} setPopupThumbnailInfo={setPopupThumbnailInfo} setCustomAlert={setCustomAlert} />
-            <MemoThumbnailList data={viewData} newDataLength={newDataLength} handleShowPopup={handleShowPopup} skeletonLength={25} />
+            <MemoInstagramNav 
+                viewData={viewData}
+                newDataLength={newDataLength}
+                isLoading={isLoading}
+                keyboardInput={keyboardInput}
+                setIsKeyboardView={setIsKeyboardView}
+                handleDataSearch={handleDataSearch}
+            />
+            <MemoCustomKeyboard 
+                isKeyboardView={isKeyboardView} 
+                setKeyboardInput={setKeyboardInput} 
+                setIsKeyboardView={setIsKeyboardView} 
+                handleOpenPopupWithAlert={handleOpenPopupWithAlert}
+            />
+            <MemoThumbnailList 
+                data={viewData} 
+                newDataLength={newDataLength} 
+                skeletonLength={25}
+                handleOpenPopup={handleOpenPopup}
+            />
+
+            {isPopupOpen && 
+                <Popup closePopup={closePopup}>
+                    {
+                        popupType === 'alert' ? <MemoAlertLayout customAlert={customAlert} /> : <ThumbnailLayout popupInfo={selectedData} />
+                    }
+                </Popup>}
         </main>
     );
 }

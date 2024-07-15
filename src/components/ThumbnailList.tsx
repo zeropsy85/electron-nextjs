@@ -10,14 +10,15 @@ import Skeleton from "./Skeleton";
 
 import { DataProps } from '@/types/DataProps';
 
+
 interface ThumbnailListProps {
     data : DataProps[];
     newDataLength : number;
-    handleShowPopup : (e: DataProps) => void;
     skeletonLength : number;
+    handleOpenPopup : (e : DataProps) => void;
 }
 
-export default function ThumbnailList({data , newDataLength , handleShowPopup , skeletonLength} : ThumbnailListProps) {
+export default function ThumbnailList({data , newDataLength , skeletonLength , handleOpenPopup} : ThumbnailListProps) {
     const thumbnailListRefs = useRef<(HTMLLIElement | null)[]>([]);
     const [firstAnimation , setFirstAnimation] = useState(true);
 
@@ -68,7 +69,7 @@ export default function ThumbnailList({data , newDataLength , handleShowPopup , 
                                 ID : {el.id}
                             </div>
                             <div className="border rounded-lg overflow-hidden text-[0px]">
-                                <button onClick={(e)=>{handleShowPopup(el)}} className="w-full h-[200px] relative">
+                                <button onClick={(e)=>handleOpenPopup(el)} className="w-full h-[200px] relative">
                                     {el.media_type === 'VIDEO' ? (
                                         <>
                                             <span className="w-full h-full absolute left-0 top-0 bg-black opacity-40"></span>
