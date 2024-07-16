@@ -2,10 +2,10 @@ import { useCallback, useState } from "react";
 
 export const useThumbnailPopup = () => {
     const [isPopupOpen , setIsPopupOpen] = useState(false);
-    const [popupType , setPopupType] = useState<'alert' | 'thumbnail'>('alert');
+    const [popupType , setPopupType] = useState('');
 
-    const openPopup = useCallback((type : 'alert' | 'thumbnail') => {
-        setPopupType(type);
+    const openPopup = useCallback((type? : 'alert') => {
+        type === 'alert' ? setPopupType(type) : setPopupType('');
         setIsPopupOpen(true);
     },[]);
 
@@ -15,8 +15,8 @@ export const useThumbnailPopup = () => {
 
     return {
         isPopupOpen,
+        popupType,
         openPopup,
-        closePopup,
-        popupType
+        closePopup
     }
 }

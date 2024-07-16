@@ -44,7 +44,7 @@ export default function InstagramApi() {
     }, [viewData , sortDataByTimestamp]);
 
     const handleOpenPopup = useCallback((data: DataProps) => {
-        openPopup('thumbnail');
+        openPopup();
         setSelectedData([data]);
     },[openPopup]);
 
@@ -79,6 +79,7 @@ export default function InstagramApi() {
 
                 const response = await getFetchData({ hashtag: defaultHashTag });
                 setViewData(sortDataByTimestamp(response));
+
             } catch (err) {
                 const errorMessage = (err as Error).message;
                 const errorObject = JSON.parse(errorMessage);
