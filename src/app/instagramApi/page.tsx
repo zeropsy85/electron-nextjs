@@ -27,7 +27,7 @@ export default function InstagramApi() {
     const [isLoading, setIsLoading] = useState(false);
     const [isKeyboardView , setIsKeyboardView] = useState(false);
     const [newDataLength , setNewDataLength] = useState(0);
-    const [keyboardInput , setKeyboardInput] = useState(defaultHashTag);
+    const [keyboardInput , setKeyboardInput] = useState('');
     const [viewData , setViewData] = useState<DataProps[]>([]);
     const [selectedData , setSelectedData] = useState<DataProps[]>([]);
     const [customAlert , setCustomAlert] = useState('');
@@ -53,13 +53,32 @@ export default function InstagramApi() {
         setCustomAlert(text);
     },[openPopup]);
 
-    const handleDataSearch = useCallback(async () => {
+    useEffect(()=>{
+        if(!navigator.onLine){
+            handleOpenPopupWithAlert('인터넷 연결을 확인하세요.');
+        }
+    },[handleOpenPopupWithAlert]);
+
+    const handleDataSearch = useCallback(async (hashtag : string) => {
         try {
             setIsLoading(true);
             setNewDataLength(0);
 
-            const response = await getFetchData({ hashtag : keyboardInput });
-            addNewData(response);            
+            const response = await getFetchData({ hashtag : hashtag });
+
+            if(response.length === 0){
+                handleOpenPopupWithAlert(`"${hashtag}" 검색 결과가 없습니다.`);
+                setViewData([]);
+            }else{
+                // if(hashtag === keyboardInput){
+                //     addNewData(response);
+                // }else{
+                //     setViewData(sortDataByTimestamp(response));
+                // }
+
+                setViewData(sortDataByTimestamp(response));
+            }
+            
         } catch (err) {
             const errorMessage = (err as Error).message;
             const errorObject = JSON.parse(errorMessage);
@@ -69,30 +88,40 @@ export default function InstagramApi() {
         } finally {
             setIsLoading(false);
         }
-    },[addNewData , keyboardInput , handleOpenPopupWithAlert]);
+    },[sortDataByTimestamp,handleOpenPopupWithAlert]);
 
-    useEffect(() => {
-        const fetchData = async () => {
-            try {
-                setIsLoading(true);
-                setNewDataLength(0);
+    // useEffect(() => {
+    //     const fetchData = async () => {
+    //         try {
+    //             setIsLoading(true);
+    //             setNewDataLength(0);
 
-                const response = await getFetchData({ hashtag: defaultHashTag });
-                setViewData(sortDataByTimestamp(response));
+    //             const response = await getFetchData({ hashtag: defaultHashTag });
+    //             setViewData(sortDataByTimestamp(response));
 
-            } catch (err) {
-                const errorMessage = (err as Error).message;
-                const errorObject = JSON.parse(errorMessage);
-                console.log(errorObject.error_user_title);
+    //         } catch (err) {
+    //             const errorMessage = (err as Error).message;
+    //             const errorObject = JSON.parse(errorMessage);
+    //             console.log(errorObject.error_user_title);
 
-                handleOpenPopupWithAlert(errorObject.error_user_title);
-            } finally {
-                setIsLoading(false);
-            }
-        };
+    //             handleOpenPopupWithAlert(errorObject.error_user_title);
+    //         } finally {
+    //             setIsLoading(false);
+    //         }
+    //     };
     
-        fetchData();
-    }, [sortDataByTimestamp , handleOpenPopupWithAlert]);
+    //     fetchData();
+    // }, [sortDataByTimestamp , handleOpenPopupWithAlert]);
+
+    useEffect(()=>{
+        if(keyboardInput !== ''){
+            handleDataSearch(keyboardInput);
+        }
+    },[keyboardInput , handleDataSearch]);
+
+    useEffect(()=>{
+        setKeyboardInput(defaultHashTag);
+    },[]);
 
     return (
         <main className="p-10 pt-[110px]">
@@ -110,13 +139,15 @@ export default function InstagramApi() {
                 setIsKeyboardView={setIsKeyboardView} 
                 handleOpenPopupWithAlert={handleOpenPopupWithAlert}
             />
-            <MemoThumbnailList 
-                data={viewData} 
-                newDataLength={newDataLength} 
-                skeletonLength={25}
-                handleOpenPopup={handleOpenPopup}
-            />
-
+            {
+                keyboardInput !== '' && viewData.length !== 0 ?
+                    <MemoThumbnailList 
+                    data={viewData} 
+                    newDataLength={newDataLength} 
+                    skeletonLength={25}
+                    handleOpenPopup={handleOpenPopup}
+                /> : <div className="border border-black rounded-md p-10 mt-16 flex">다른 해시 태그를 검색해주세요.</div>
+            }
             {isPopupOpen && 
                 <Popup closePopup={closePopup}>
                     {
