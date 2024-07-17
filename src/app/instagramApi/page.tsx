@@ -11,14 +11,12 @@ import Popup from "@/components/Popup";
 import { DataProps } from "@/types/DataProps";
 import { useThumbnailPopup } from '@/hooks/useThumbNailPopup';
 
-// import { getFetchData } from "./actions";
 import ThumbnailLayout from "@/components/ThumbnailLayout";
 
 const MemoInstagramNav = React.memo(InstagramNav);
 const MemoCustomKeyboard = React.memo(CustomKeyboard);
 const MemoAlertLayout = React.memo(AlertLayout);
 const MemoThumbnailList = React.memo(ThumbnailList);
-
 
 const FACEBOOK_API = 'https://graph.facebook.com/v20.0';
 const INSTAGRAM_BUSINESS_ID = '17841400119039742';
