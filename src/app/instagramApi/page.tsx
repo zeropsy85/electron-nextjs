@@ -11,7 +11,7 @@ import Popup from "@/components/Popup";
 import { DataProps } from "@/types/DataProps";
 import { useThumbnailPopup } from '@/hooks/useThumbNailPopup';
 
-import { getFetchData } from "./actions";
+// import { getFetchData } from "./actions";
 import ThumbnailLayout from "@/components/ThumbnailLayout";
 
 const MemoInstagramNav = React.memo(InstagramNav);
@@ -19,6 +19,10 @@ const MemoCustomKeyboard = React.memo(CustomKeyboard);
 const MemoAlertLayout = React.memo(AlertLayout);
 const MemoThumbnailList = React.memo(ThumbnailList);
 
+
+const FACEBOOK_API = 'https://graph.facebook.com/v20.0';
+const INSTAGRAM_BUSINESS_ID = '17841400119039742';
+const ACCESS_TOKEN = 'EAAQoDAIkG7oBO4Ox1coua59HuR8ZBqD706sZAtMc13DZBYSTLRmewZAgZC9QYJxfzGameOh7CvsoqrsxmRuGRhXUZAMq9DmBqjwHOkgcq7hxZBMErVAIVch5cDuZBBlpPkVXP86slT0IkBGFveT0CcN5PqPWAjZASisI9RmPOZA4CPFIZC7xYqd7stv8JMi';
 const defaultHashTag = 'samsung';
 
 export default function InstagramApi() {
@@ -50,14 +54,23 @@ export default function InstagramApi() {
     const handleDataSearch = useCallback(async (hashtag : string) => {
         try {
             setIsLoading(true);
-            const response = await getFetchData({ hashtag : hashtag });
 
-            if(response.length === 0){
+            const hashTagResponse = await fetch(`${FACEBOOK_API}/ig_hashtag_search?user_id=${INSTAGRAM_BUSINESS_ID}&access_token=${ACCESS_TOKEN}&q=${hashtag}`);
+            const searchHashTagId = await hashTagResponse.json();
+        
+            if (searchHashTagId.error) {
+                throw new Error(JSON.stringify(searchHashTagId.error));
+            }
+        
+            const hashTagId = searchHashTagId.data[0].id;
+            const resp = await fetch(`${FACEBOOK_API}/${hashTagId}/recent_media?user_id=${INSTAGRAM_BUSINESS_ID}&fields=id,media_type,like_count,media_url,permalink,timestamp&access_token=${ACCESS_TOKEN}`);
+            const json = await resp.json();
+
+            if(json.data.length === 0){
                 handleOpenPopupWithAlert(`"${hashtag}" 검색 결과가 없습니다.`);
             }
 
-            setViewData(response);
-            
+            setViewData(json.data);
         } catch (err) {
             const errorMessage = (err as Error).message;
             const errorObject = JSON.parse(errorMessage);
