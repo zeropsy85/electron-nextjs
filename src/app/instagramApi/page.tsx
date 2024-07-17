@@ -23,29 +23,17 @@ const defaultHashTag = 'samsung';
 
 export default function InstagramApi() {
     const { isPopupOpen , popupType, openPopup , closePopup } = useThumbnailPopup();
-
     const [isLoading, setIsLoading] = useState(false);
     const [isKeyboardView , setIsKeyboardView] = useState(false);
-    const [newDataLength , setNewDataLength] = useState(0);
     const [keyboardInput , setKeyboardInput] = useState('');
     const [viewData , setViewData] = useState<DataProps[]>([]);
-    const [selectedData , setSelectedData] = useState<DataProps[]>([]);
+    const [popupInfo , setPopupInfo] = useState<DataProps[]>([]);
+    const [totalDataLength , setTotalDataLength] = useState(0);
     const [customAlert , setCustomAlert] = useState('');
-
-    const sortDataByTimestamp = useCallback((data: DataProps[])=>{
-        return data.sort((a: { timestamp: string }, b: { timestamp: string }) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
-    },[]);
-
-    const addNewData = useCallback((data: DataProps[]) => {
-        const newData = data.filter((newItem: DataProps) => !viewData.some((viewItem:DataProps) => viewItem.id === newItem.id));
-
-        setViewData((prevData:DataProps[]) => [...sortDataByTimestamp(newData), ...prevData]);
-        setNewDataLength(newData.length);
-    }, [viewData , sortDataByTimestamp]);
 
     const handleOpenPopup = useCallback((data: DataProps) => {
         openPopup();
-        setSelectedData([data]);
+        setPopupInfo([data]);
     },[openPopup]);
 
     const handleOpenPopupWithAlert = useCallback((text: string) => {
@@ -62,22 +50,13 @@ export default function InstagramApi() {
     const handleDataSearch = useCallback(async (hashtag : string) => {
         try {
             setIsLoading(true);
-            setNewDataLength(0);
-
             const response = await getFetchData({ hashtag : hashtag });
 
             if(response.length === 0){
                 handleOpenPopupWithAlert(`"${hashtag}" 검색 결과가 없습니다.`);
-                setViewData([]);
-            }else{
-                // if(hashtag === keyboardInput){
-                //     addNewData(response);
-                // }else{
-                //     setViewData(sortDataByTimestamp(response));
-                // }
-
-                setViewData(sortDataByTimestamp(response));
             }
+
+            setViewData(response);
             
         } catch (err) {
             const errorMessage = (err as Error).message;
@@ -88,33 +67,11 @@ export default function InstagramApi() {
         } finally {
             setIsLoading(false);
         }
-    },[sortDataByTimestamp,handleOpenPopupWithAlert]);
-
-    // useEffect(() => {
-    //     const fetchData = async () => {
-    //         try {
-    //             setIsLoading(true);
-    //             setNewDataLength(0);
-
-    //             const response = await getFetchData({ hashtag: defaultHashTag });
-    //             setViewData(sortDataByTimestamp(response));
-
-    //         } catch (err) {
-    //             const errorMessage = (err as Error).message;
-    //             const errorObject = JSON.parse(errorMessage);
-    //             console.log(errorObject.error_user_title);
-
-    //             handleOpenPopupWithAlert(errorObject.error_user_title);
-    //         } finally {
-    //             setIsLoading(false);
-    //         }
-    //     };
-    
-    //     fetchData();
-    // }, [sortDataByTimestamp , handleOpenPopupWithAlert]);
+    },[handleOpenPopupWithAlert]);
 
     useEffect(()=>{
         if(keyboardInput !== ''){
+            setViewData([]);
             handleDataSearch(keyboardInput);
         }
     },[keyboardInput , handleDataSearch]);
@@ -126,8 +83,7 @@ export default function InstagramApi() {
     return (
         <main className="p-10 pt-[110px]">
             <MemoInstagramNav 
-                viewData={viewData}
-                newDataLength={newDataLength}
+                totalDataLength={totalDataLength}
                 isLoading={isLoading}
                 keyboardInput={keyboardInput}
                 setIsKeyboardView={setIsKeyboardView}
@@ -139,19 +95,16 @@ export default function InstagramApi() {
                 setIsKeyboardView={setIsKeyboardView} 
                 handleOpenPopupWithAlert={handleOpenPopupWithAlert}
             />
-            {
-                keyboardInput !== '' && viewData.length !== 0 ?
-                    <MemoThumbnailList 
-                    data={viewData} 
-                    newDataLength={newDataLength} 
-                    skeletonLength={25}
-                    handleOpenPopup={handleOpenPopup}
-                /> : <div className="border border-black rounded-md p-10 mt-16 flex">다른 해시 태그를 검색해주세요.</div>
-            }
+            <MemoThumbnailList 
+                viewData={viewData} 
+                skeletonLength={25}
+                handleOpenPopup={handleOpenPopup}
+                setTotalDataLength={setTotalDataLength}
+            />
             {isPopupOpen && 
                 <Popup closePopup={closePopup}>
                     {
-                        popupType === 'alert' ? <MemoAlertLayout customAlert={customAlert} /> : <ThumbnailLayout popupInfo={selectedData} />
+                        popupType === 'alert' ? <MemoAlertLayout customAlert={customAlert} /> : <ThumbnailLayout popupInfo={popupInfo} />
                     }
                 </Popup>}
         </main>

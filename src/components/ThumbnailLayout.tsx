@@ -24,13 +24,7 @@ export default function ThumbnailLayout({popupInfo} : ThumbnailLayoutProps) {
     useEffect(() => {
         const videoElement = videoRef.current;
         if (videoElement) {
-            videoElement?.play();
-        }
-
-        return () => {
-            if (videoElement) {
-                videoElement?.pause();
-            }
+            videoElement.play();
         }
     }, []);
 
